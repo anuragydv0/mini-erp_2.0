@@ -28,7 +28,7 @@ interface ErpContextType {
   
   // Actions
   createProduct: (data: Partial<ErpProduct>) => Promise<void>
-  createSalesOrder: (customerName: string, items: {productId: string, quantity: string|number, price: number}[]) => Promise<void>
+  createSalesOrder: (customerName: string, items: {productId: string, quantity: string|number, price: number}[], customerAddress?: string) => Promise<void>
   confirmSalesOrder: (orderId: string) => Promise<void>
   deliverSalesOrder: (orderId: string) => Promise<void>
   confirmPurchaseOrder: (orderId: string) => Promise<void>
@@ -57,6 +57,7 @@ const mapProduct = (p: any): ErpProduct => ({
   procurementType: p.procurement_strategy || 'MTS',
   procurementMethod: p.procure_on_demand ? 'Manufacturing' : 'Purchase',
   vendorId: p.vendor_id?._id || p.vendor_id || undefined,
+  imageUrl: p.image?.url || undefined,
 })
 
 const mapSalesOrder = (so: any): SalesOrder => ({
@@ -181,9 +182,9 @@ export function ErpProvider({ children }: { children: ReactNode }) {
 
   const createProduct = async (data: Partial<ErpProduct>) => {
     try {
-      const payload = {
+      const payload: any = {
         name: data.name,
-        sku: data.code || generateId('PCODE'),
+        sku: data.code,
         sales_price: data.salesPrice || 0,
         cost_price: data.costPrice || 0,
         on_hand_qty: data.onHandQty || 0,
@@ -191,13 +192,23 @@ export function ErpProvider({ children }: { children: ReactNode }) {
         procurement_strategy: data.procurementType || 'MTS',
         procure_on_demand: data.procurementMethod === 'Manufacturing' || false,
         vendor_id: data.vendorId || null,
-        is_active: true
+        is_active: true,
+        image: data.imageUrl ? { url: data.imageUrl } : undefined
       };
       
-      const newRawProduct = await productApi.createProduct(payload);
-      const newProduct = mapProduct(newRawProduct);
-      setProducts(prev => [newProduct, ...prev])
-      toast.success(`Product ${newProduct.name} saved!`)
+      if (!payload.sku) {
+        payload.sku = generateId('PCODE');
+      }
+
+      if (data.id) {
+        await productApi.updateProduct(data.id, payload);
+        toast.success(`Product ${data.name} updated!`)
+      } else {
+        const newRawProduct = await productApi.createProduct(payload);
+        const newProduct = mapProduct(newRawProduct);
+        setProducts(prev => [newProduct, ...prev])
+        toast.success(`Product ${newProduct.name} saved!`)
+      }
       fetchData() // Refresh stock/levels
     } catch (err: any) {
       toast.error(err.message || 'Network Error')
@@ -205,9 +216,10 @@ export function ErpProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const createSalesOrder = async (customerName: string, items: {productId: string, quantity: string|number, price: number}[]) => {
+  const createSalesOrder = async (customerName: string, items: {productId: string, quantity: string|number, price: number}[], customerAddress?: string) => {
     const payload = {
       customer: customerName,
+      customer_address: customerAddress,
       products: items.map(i => ({
         product_id: i.productId,
         ordered_quantity: Number(i.quantity),

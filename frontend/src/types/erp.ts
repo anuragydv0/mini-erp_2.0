@@ -13,6 +13,7 @@ export interface ErpProduct {
   procurementType: ProcurementType
   procurementMethod: ProcurementMethod
   vendorId?: string
+  imageUrl?: string
 }
 
 export type OrderStatus = 'Draft' | 'Confirmed' | 'Partially Processed' | 'Completed' | 'Cancelled'

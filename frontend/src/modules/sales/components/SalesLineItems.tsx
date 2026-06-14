@@ -111,10 +111,17 @@ export default function SalesLineItems({
                             unitPrice: selectedProd.salesPrice,
                             total: item.orderedQty * selectedProd.salesPrice
                           })
+                        } else {
+                          onChangeRow(item.id, {
+                            product: '',
+                            sku: '',
+                            unitPrice: 0,
+                            total: 0
+                          })
                         }
                       }}
                     >
-                      <option value="">Select a Product...</option>
+                      <option value="">Select Product</option>
                       {products.map(p => (
                         <option key={p.id} value={p.id}>
                           {p.name} ({p.code}) - ₹{p.salesPrice}
@@ -160,11 +167,11 @@ export default function SalesLineItems({
                     0
                   </td>
                   <td className="px-4 py-4 text-right text-sm text-slate-700">
-                    {formatCurrency(item.unitPrice)}
+                    {item.sku ? formatCurrency(item.unitPrice) : '—'}
                   </td>
                   <td className="px-4 py-4 text-right">
                     <span className="text-sm font-bold text-indigo-600">
-                      {formatCurrency(item.total)}
+                      {item.sku ? formatCurrency(item.total) : '—'}
                     </span>
                   </td>
                   <td className="px-4 py-4 text-center">

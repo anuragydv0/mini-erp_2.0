@@ -49,7 +49,7 @@ export default function PurchasePage({ activePage, onNavigate }: PageProps) {
   const [loading, setLoading] = useState(true)
   const [vendors, setVendors] = useState<Vendor[]>([])
 
-  const { purchaseOrders } = useErp()
+  const { purchaseOrders, setActiveOrderId } = useErp()
 
   useEffect(() => {
     const fetchVendorsData = async () => {
@@ -75,10 +75,18 @@ export default function PurchasePage({ activePage, onNavigate }: PageProps) {
   }
 
   const handleNewRecord = () => {
+    setActiveOrderId(null)
+    localStorage.removeItem('create_po_vendor_id')
     onNavigate('purchase-order-detail')
   }
 
   const handleIssuePO = () => {
+    setActiveOrderId(null)
+    if (selectedVendorId) {
+      localStorage.setItem('create_po_vendor_id', selectedVendorId)
+    } else {
+      localStorage.removeItem('create_po_vendor_id')
+    }
     onNavigate('purchase-order-detail')
   }
 

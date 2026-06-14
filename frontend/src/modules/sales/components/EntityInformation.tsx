@@ -18,6 +18,7 @@ export default function EntityInformation({
   customerOptions,
   onCustomerChange,
   onDateChange,
+  onAddressChange,
 }: EntityInformationProps) {
   const [showDropdown, setShowDropdown] = useState(false)
 
@@ -62,7 +63,7 @@ export default function EntityInformation({
                       option === customerName
                         ? 'bg-indigo-50 font-medium text-indigo-700'
                         : 'text-slate-700'
-                    }`}
+                     }`}
                   >
                     {option}
                   </button>
@@ -93,9 +94,13 @@ export default function EntityInformation({
         <label className="mb-1.5 block text-sm font-medium text-slate-600">
           Billing Address
         </label>
-        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-          <p className="text-sm text-slate-700">{billingAddress}</p>
-        </div>
+        <textarea
+          rows={2}
+          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100 resize-none"
+          placeholder="Enter Billing Address"
+          value={billingAddress}
+          onChange={(e) => onAddressChange(e.target.value)}
+        />
       </div>
     </div>
   )

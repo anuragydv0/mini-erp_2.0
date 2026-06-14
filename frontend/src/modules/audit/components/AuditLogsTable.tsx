@@ -5,6 +5,25 @@ interface AuditLogsTableProps {
   loading?: boolean
 }
 
+function formatValue(val: any): string {
+  if (val === null || val === undefined || val === '') return '—'
+  if (typeof val === 'object') {
+    if (Array.isArray(val)) {
+      if (val.length > 0 && typeof val[0] === 'object') {
+        return val.map((item: any) => {
+          const name = item.product_name || item.name || 'Unknown'
+          const qty = item.ordered_quantity || item.quantity || 0
+          return `${name} (${qty})`
+        }).join(', ')
+      }
+      return val.map(item => String(item)).join(', ')
+    }
+    if (val.name) return val.name
+    return JSON.stringify(val)
+  }
+  return String(val)
+}
+
 export default function AuditLogsTable({ logs, loading }: AuditLogsTableProps) {
   return (
     <div className="w-full overflow-hidden border border-slate-300 bg-white rounded-lg">
@@ -56,8 +75,18 @@ export default function AuditLogsTable({ logs, loading }: AuditLogsTableProps) {
                   </span>
                 </td>
                 <td className="px-4 py-3 text-center text-slate-500">{log.fieldChanged}</td>
-                <td className="px-4 py-3 text-center text-red-500 max-w-[120px] truncate">{log.oldValue}</td>
-                <td className="px-4 py-3 text-center text-green-600 max-w-[120px] truncate">{log.newValue}</td>
+                <td 
+                  className="px-4 py-3 text-center text-red-500 max-w-[120px] truncate"
+                  title={formatValue(log.oldValue)}
+                >
+                  {formatValue(log.oldValue)}
+                </td>
+                <td 
+                  className="px-4 py-3 text-center text-green-600 max-w-[120px] truncate"
+                  title={formatValue(log.newValue)}
+                >
+                  {formatValue(log.newValue)}
+                </td>
               </tr>
             ))
           )}

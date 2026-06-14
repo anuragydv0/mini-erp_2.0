@@ -8,7 +8,7 @@ interface ProductTableProps {
   selectedIds: Set<string>
   onToggleSelect: (id: string) => void
   onToggleSelectAll: () => void
-  onProductClick: (productName: string) => void
+  onProductClick: (id: string) => void
 }
 
 // statusConfig removed
@@ -88,19 +88,21 @@ export default function ProductTable({
                 <td className="px-4 py-4">
                   <button
                     type="button"
-                    onClick={() => onProductClick(product.name)}
+                    onClick={() => onProductClick(product.id)}
                     className="flex items-center gap-3 text-left"
                   >
                     <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${product.imageBg}`}
+                      className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-100 border border-slate-200"
                     >
-                      <Icon
-                        className={`h-5 w-5 ${
-                          product.imageBg.includes('100')
-                            ? 'text-indigo-600'
-                            : 'text-white'
-                        }`}
-                      />
+                      {product.imageUrl ? (
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <Icon className="h-5 w-5 text-indigo-600" />
+                      )}
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-slate-900 group-hover:text-indigo-600">

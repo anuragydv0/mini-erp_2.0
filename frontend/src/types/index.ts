@@ -231,6 +231,7 @@ export interface Product {
   procurementType?: 'Purchase' | 'Manufacturing'
   vendor?: string
   bom?: string
+  imageUrl?: string
 }
 
 export interface ProductStatCardData {

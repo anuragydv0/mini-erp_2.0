@@ -32,6 +32,7 @@ export default function SalesOrderCreatePage({
   })
   const [lineItems, setLineItems] = useState<CreateLineItem[]>([])
   const [status, setStatus] = useState('Draft')
+  const [billingAddress, setBillingAddress] = useState('')
 
   // Computed
   const subtotal = lineItems.reduce((sum, item) => sum + item.total, 0)
@@ -78,7 +79,7 @@ export default function SalesOrderCreatePage({
     }))
     try {
       setLoading(true)
-      await createSalesOrder(customerName, mappedItems)
+      await createSalesOrder(customerName, mappedItems, billingAddress)
       onNavigate('sales')
     } catch (err) {
       // Error handled in context
@@ -100,16 +101,15 @@ export default function SalesOrderCreatePage({
   }
 
   const handleAddRow = () => {
-    const defaultProduct = products[0]
     const newItem: CreateLineItem = {
       id: String(Date.now() + Math.random()),
       rowNum: lineItems.length + 1,
-      product: defaultProduct?.name || 'Select Product',
-      sku: defaultProduct?.id || '',
+      product: '',
+      sku: '',
       orderedQty: 1,
       deliveredQty: 0,
-      unitPrice: defaultProduct?.salesPrice || 0,
-      total: defaultProduct?.salesPrice || 0,
+      unitPrice: 0,
+      total: 0,
     }
     setLineItems([...lineItems, newItem])
     toast.success('Row added')
@@ -166,11 +166,11 @@ export default function SalesOrderCreatePage({
                 <EntityInformation
                   customerName={customerName}
                   orderDate={orderDate}
-                  billingAddress={''}
+                  billingAddress={billingAddress}
                   customerOptions={customerOptions}
                   onCustomerChange={setCustomerName}
                   onDateChange={setOrderDate}
-                  onAddressChange={handleButtonClick as unknown as (v: string) => void}
+                  onAddressChange={setBillingAddress}
                 />
 
                 <SalesLineItems

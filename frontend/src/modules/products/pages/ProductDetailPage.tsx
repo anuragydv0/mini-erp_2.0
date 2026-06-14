@@ -22,7 +22,7 @@ export default function ProductDetailPage({ onNavigate }: PageProps) {
   const [costPrice, setCostPrice] = useState(activeProduct?.costPrice ?? 0)
   const [onHandQty, setOnHandQty] = useState(String(activeProduct?.onHandQty ?? 0))
   const [freeToUseQty, setFreeToUseQty] = useState(String((activeProduct?.onHandQty ?? 0) - (activeProduct?.reservedQty ?? 0)))
-  const [productImage, setProductImage] = useState<string | null>(null)
+  const [productImage, setProductImage] = useState<string | null>(activeProduct?.imageUrl || null)
   const [procurement, setProcurement] = useState<ProcurementConfig>({
     procureOnDemand: activeProduct?.procurementType === 'MTO',
     procurementType: (activeProduct?.procurementMethod as any) || 'Purchase',
@@ -34,6 +34,46 @@ export default function ProductDetailPage({ onNavigate }: PageProps) {
     route: undefined,
     routeOptions: [],
   })
+
+  useEffect(() => {
+    if (activeProduct) {
+      setProductName(activeProduct.name || '')
+      setSalesPrice(activeProduct.salesPrice ?? 0)
+      setCostPrice(activeProduct.costPrice ?? 0)
+      setOnHandQty(String(activeProduct.onHandQty ?? 0))
+      setFreeToUseQty(String((activeProduct.onHandQty ?? 0) - (activeProduct.reservedQty ?? 0)))
+      setProductImage(activeProduct.imageUrl || null)
+      setProcurement({
+        procureOnDemand: activeProduct.procurementType === 'MTO',
+        procurementType: (activeProduct.procurementMethod as any) || 'Purchase',
+        vendor: activeProduct.vendorId,
+        bom: undefined,
+        vendorOptions: [],
+        bomOptions: [],
+        isActive: true,
+        route: undefined,
+        routeOptions: [],
+      })
+    } else {
+      setProductName('')
+      setSalesPrice(0)
+      setCostPrice(0)
+      setOnHandQty('0')
+      setFreeToUseQty('0')
+      setProductImage(null)
+      setProcurement({
+        procureOnDemand: false,
+        procurementType: 'Purchase',
+        vendor: undefined,
+        bom: undefined,
+        vendorOptions: [],
+        bomOptions: [],
+        isActive: true,
+        route: undefined,
+        routeOptions: [],
+      })
+    }
+  }, [activeProduct])
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1000)
@@ -52,6 +92,7 @@ export default function ProductDetailPage({ onNavigate }: PageProps) {
   const handleSave = async () => {
     try {
       await createProduct({
+        id: activeProduct?.id,
         name: productName,
         salesPrice: salesPrice,
         costPrice: costPrice,
@@ -59,7 +100,8 @@ export default function ProductDetailPage({ onNavigate }: PageProps) {
         freeToUseQty: parseFloat(freeToUseQty) || 0,
         procurementType: procurement.procureOnDemand ? 'MTO' : 'MTS',
         procurementMethod: procurement.procurementType || 'Purchase',
-        vendorId: procurement.vendor
+        vendorId: procurement.vendor,
+        imageUrl: productImage || undefined
       })
       onNavigate('products')
     } catch (err) {
@@ -94,9 +136,13 @@ export default function ProductDetailPage({ onNavigate }: PageProps) {
   }
 
   const handleImageChange = (file: File) => {
-    // Create object URL for preview
-    const imageUrl = URL.createObjectURL(file)
-    setProductImage(imageUrl)
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      if (typeof reader.result === 'string') {
+        setProductImage(reader.result)
+      }
+    }
+    reader.readAsDataURL(file)
   }
 
   return (

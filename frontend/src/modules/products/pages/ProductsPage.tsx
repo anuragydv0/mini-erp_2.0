@@ -15,7 +15,7 @@ import { useErp } from '@/context/ErpContext'
 import { useAuth } from '@/context/AuthContext'
 
 export default function ProductsPage({ activePage, onNavigate }: PageProps) {
-  const { products: erpProducts, isLoading } = useErp()
+  const { products: erpProducts, isLoading, setActiveOrderId } = useErp()
   const { user } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<ActiveFilter[]>(defaultFilters)
@@ -36,10 +36,12 @@ export default function ProductsPage({ activePage, onNavigate }: PageProps) {
   }
 
   const handleNewProduct = () => {
+    setActiveOrderId(null)
     onNavigate('product-detail')
   }
 
-  const handleProductClick = (_productName: string) => {
+  const handleProductClick = (productId: string) => {
+    setActiveOrderId(productId)
     onNavigate('product-detail')
   }
 
@@ -69,7 +71,8 @@ export default function ProductsPage({ activePage, onNavigate }: PageProps) {
       freeToUse: (p.onHandQty || 0) - (p.reservedQty || 0),
       status: (p.onHandQty > 10 ? 'In Stock' : p.onHandQty > 0 ? 'Low Stock' : 'Out of Stock') as any,
       imageBg: 'bg-indigo-100',
-      imageIcon: Package
+      imageIcon: Package,
+      imageUrl: p.imageUrl
     }))
 
     if (searchQuery === '') return mapped
